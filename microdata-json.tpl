@@ -5,15 +5,16 @@
 * by Ruben Divall @rubendivall http://www.rubendivall.com 
 * Module by @atomiksoft: https://addons.prestashop.com/en/seo-natural-search-engine-optimization/24511-microformats-in-ldjson.html
 *}
+{* Edited for Prestshop 1.7.x
 <script type="application/ld+json">
 {
     "@context" : "http://schema.org",
     "@type" : "Organization",
-    "name" : "{$shop_name|escape:'html':'UTF-8'}",
-    "url" : "{$link->getPageLink('index', true)|escape:'html':'UTF-8'}",
+    "name" : "{$shop.name|escape:'html':'UTF-8'}",
+    "url" : "{$page.canonical|escape:'html':'UTF-8'}",
     "logo" : {
         "@type":"ImageObject",
-        "url":"{$logo_url|escape:'html':'UTF-8'}"
+        "url":"{$shop.logo|escape:'html':'UTF-8'}"
     }
 }
 </script>
@@ -23,22 +24,22 @@
     "@type":"WebPage",
     "isPartOf": {
         "@type":"WebSite",
-        "url":  "{$link->getPageLink('index', true)|escape:'html':'UTF-8'}",
-        "name": "{$shop_name|escape:'html':'UTF-8'}"
+        "url":  "{$page.canonical|escape:'html':'UTF-8'}",
+        "name": "{$shop.name|escape:'html':'UTF-8'}"
     },
-    "name": "{$meta_title|escape:'html':'UTF-8'}",
-    "url":  "{if isset($force_ssl) && $force_ssl}{$base_dir_ssl|escape:'html':'UTF-8'}{trim($smarty.server.REQUEST_URI,'/')|escape:'html':'UTF-8'}{else}{$base_dir|escape:'html':'UTF-8'}{trim($smarty.server.REQUEST_URI,'/')|escape:'html':'UTF-8'}{/if}"
+    "name": "{$page.meta.title|escape:'html':'UTF-8'}",
+    "url":  "{$page.canonical}"
 }
 </script>
-{if $page_name =='index'}
+{if $page.page_name =='index'}
 <script	type="application/ld+json">
 {
 	"@context":	"http://schema.org",
 	"@type": "WebSite",
-	"url": "{$link->getPageLink('index', true)|escape:'html':'UTF-8'}",
+	"url": "{$page.canonical|escape:'html':'UTF-8'}",
 	"image": {
 	"@type": "ImageObject",
-	"url":  "{$logo_url|escape:'html':'UTF-8'}"
+	"url":  "{$shop.logo|escape:'html':'UTF-8'}"
 	},
     "potentialAction": {
     "@type": "SearchAction",
@@ -48,7 +49,7 @@
 }
 </script>
 {/if}
-{if $page_name == 'product'}
+{if $page.page_name == 'product'}
 <script type="application/ld+json">
     {
     "@context": "http://schema.org/",
@@ -68,10 +69,10 @@
     {if empty($combinations)}
     "offers": {
         "@type": "Offer",
-        "priceCurrency": "{$currency->iso_code|escape:'html':'UTF-8'}",
+        "priceCurrency": "{$currency.iso_code|escape:'html':'UTF-8'}",
         "name": "{$product->name|escape:'html':'UTF-8'}",
         "price": "{$product->getPrice(true, $smarty.const.NULL, 2)|round:'2'|escape:'html':'UTF-8'}",
-        "image": "{$link->getImageLink($product->link_rewrite, $cover.id_image, 'home_default')|escape:'html':'UTF-8'}",
+        "image": "{$link->getImageLink($product->link_rewrite, $product->id_default_image, 'home_default')|escape:'html':'UTF-8'}",
         {if $product->ean13}
         "gtin13": "{$product->ean13|escape:'html':'UTF-8'}",
         {else if $product->upc}
@@ -93,22 +94,19 @@
         {
         "@type": "Offer",
         "name": "{$product->name|escape:'html':'UTF-8'} - {$combination.reference}",
-        "priceCurrency": "{$currency->iso_code|escape:'html':'UTF-8'}",
+        "priceCurrency": "{$currency.iso_code|escape:'html':'UTF-8'}",
         "price": "{Product::getPriceStatic($product->id, true, $id_product_combination)|round:'2'}",
-        "image": "{if $combination.id_image > 0}{$link->getImageLink($product->link_rewrite, $combination.id_image, 'home_default')|escape:'html':'UTF-8'}{else}{$link->getImageLink($product->link_rewrite, $cover.id_image, 'home_default')|escape:'html':'UTF-8'}{/if}",
-        {if $combination.ean13}
-        "gtin13": "{$combination.ean13|escape:'html':'UTF-8'}",
-        {else if $combination.upc}
-        "gtin13": "0{$combination.upc|escape:'html':'UTF-8'}",
+        "image": "{if $combination.id_image > 0}{$link->getImageLink($product->link_rewrite, $combination.id_image, 'home_default')|escape:'html':'UTF-8'}{else}{$link->getImageLink($product->link_rewrite, $combination.id_image, 'home_default')|escape:'html':'UTF-8'}{/if}",
+        {if $combination.reference}
+        "gtin13": "{$combination.reference|escape:'html':'UTF-8'}",
         {/if}
         "sku": "{$combination.reference}",
-        {if $combination.condition == 'new'}"itemCondition": "http://schema.org/NewCondition",{/if}
-        {if $combination.condition == 'used'}"itemCondition": "http://schema.org/UsedCondition",{/if}
-        {if $combination.condition == 'refurbished'}"itemCondition": "http://schema.org/RefurbishedCondition",{/if}
+        "item
+        "itemCondition": "http://schema.org/NewCondition",
         "availability": {if $combination.quantity > 0}"http://schema.org/InStock"{else}"http://schema.org/OutOfStock"{/if},
         "seller": {
             "@type": "Organization",
-            "name": "{$shop_name|escape:'html':'UTF-8'}"}
+            "name": "{$shop.name|escape:'html':'UTF-8'}"}
         } {if !$combination@last},{/if}          
      {/foreach}
     ]
